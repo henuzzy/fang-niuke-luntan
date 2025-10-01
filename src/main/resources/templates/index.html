@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>牛客论坛 - 首页</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+    <link rel="stylesheet" th:href="@{/css/message-badge.css}">
+    <link rel="stylesheet" th:href="@{/css/navbar-fix.css}">
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-logo">
+                <img th:src="@{/img/首页底部的分页导航栏.jpg}" alt="Logo">
+            </div>
+            <a href="/" class="navbar-brand">牛客</a>
+            
+            <ul class="navbar-menu">
+                <li><a href="/" class="active">首页</a></li>
+                <li><a href="/discover">发现</a></li>
+                <li><a href="/topics">话题</a></li>
+                <li><a href="/courses">课程</a></li>
+            </ul>
+            
+            <div class="navbar-search">
+                <input type="text" placeholder="搜索帖子、用户...">
+            </div>
+            
+            <div class="navbar-user">
+                <div class="dropdown">
+                    <div class="dropdown-toggle">
+                        <img th:src="@{/img/首页底部的分页导航栏.jpg}" alt="用户头像" class="user-avatar">
+                    </div>
+                    <div class="dropdown-menu">
+                        <a href="/profile">个人主页</a>
+                        <a href="/settings">账号设置</a>
+                        <a href="#" onclick="logout(event)">退出登录</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="container">
+        <div class="main-content">
+            <main class="center-content">
+                <!-- 帖子列表 -->
+                <div class="post-list">
+                    <div class="post-item" th:each="post : ${page.rows}">
+                        <div class="post-avatar-wrapper">
+                            <img th:src="@{/img/首页底部的分页导航栏.jpg}" alt="用户头像" class="post-avatar">
+                        </div>
+                        <div class="post-content-wrapper">
+                            <div class="post-header">
+                                <span class="post-author" th:text="${post.username != null ? post.username : '匿名用户'}">寒江雪</span>
+                                <span class="post-time" th:text="${#dates.format(post.createTime, 'yyyy年M月d日 H:mm:ss')}">2019年5月4日 5:22:18</span>
+                                <div class="post-badges">
+                                    <span class="badge badge-new" th:if="${post.type == 1}">新</span>
+                                    <span class="badge badge-essence" th:if="${post.status == 1}">精</span>
+                                </div>
+                            </div>
+                            <a th:href="@{/post/{id}(id=${post.id})}" class="post-title" th:text="${post.title}">备战春招，面试刷题跟他复习，一个月全搞定！</a>
+                            <div class="post-footer">
+                                <div class="post-actions">
+                                    <button class="btn-reply" th:onclick="'replyPost(' + ${post.id} + ')'">回复</button>
+                                    <a th:href="@{/post/{id}(id=${post.id})}" class="btn-detail">查看详情</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分页 -->
+                <div class="pagination-wrapper" th:if="${page.total > 0}">
+                    <ul class="pagination">
+                        <li th:class="${page.page == 1 ? 'disabled' : ''}">
+                            <a th:href="@{/(page=1,order=${order})}" th:class="${page.page == 1 ? 'disabled' : ''}">首页</a>
+                        </li>
+                        <li th:class="${page.page == 1 ? 'disabled' : ''}">
+                            <a th:href="@{/(page=${page.page - 1},order=${order})}" th:class="${page.page == 1 ? 'disabled' : ''}">上一页</a>
+                        </li>
+                        <li th:each="i : ${#numbers.sequence(1, page.pages <= 5 ? page.pages : 5)}" 
+                            th:class="${i == page.page ? 'active' : ''}">
+                            <a th:href="@{/(page=${i},order=${order})}" th:text="${i}">1</a>
+                        </li>
+                        <li th:class="${page.page == page.pages ? 'disabled' : ''}">
+                            <a th:href="@{/(page=${page.page + 1},order=${order})}" th:class="${page.page == page.pages ? 'disabled' : ''}">下一页</a>
+                        </li>
+                        <li th:class="${page.page == page.pages ? 'disabled' : ''}">
+                            <a th:href="@{/(page=${page.pages},order=${order})}" th:class="${page.page == page.pages ? 'disabled' : ''}">末页</a>
+                        </li>
+                    </ul>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script th:src="@{/js/common.js}"></script>
+    <script>
+        function logout(event) {
+            event.preventDefault();
+            if (confirm('确定要退出登录吗？')) {
+                const ticket = getCookie('ticket');
+                if (ticket) {
+                    request('/users/logout?ticket=' + ticket, 'POST', null)
+                        .then(response => {
+                            if (response.code === 1) {
+                                showMessage('退出成功');
+                                setCookie('ticket', '', -1);
+                                setTimeout(() => {
+                                    location.href = '/';
+                                }, 1000);
+                            }
+                        });
+                } else {
+                    location.href = '/';
+                }
+            }
+        }
+        
+        function replyPost(postId) {
+            // 跳转到帖子详情页进行回复
+            window.location.href = '/post/' + postId + '#reply';
+        }
+    </script>
+</body>
+</html>
+

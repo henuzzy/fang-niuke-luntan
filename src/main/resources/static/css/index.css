@@ -1,0 +1,166 @@
+/* 首页样式 */
+.main-content {
+    margin-top: 20px;
+    padding-bottom: 40px;
+}
+
+.center-content {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* 帖子列表 */
+.post-list {
+    background-color: #fff;
+    border-radius: 4px;
+    border: 1px solid #e5e5e5;
+}
+
+.post-item {
+    padding: 20px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+    display: flex;
+    gap: 15px;
+}
+
+.post-item:last-child {
+    border-bottom: none;
+}
+
+.post-item:hover {
+    background-color: #fafbfc;
+}
+
+.post-avatar-wrapper {
+    flex-shrink: 0;
+}
+
+.post-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid #e5e5e5;
+}
+
+.post-content-wrapper {
+    flex: 1;
+    min-width: 0;
+}
+
+.post-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.post-author {
+    font-weight: 500;
+    color: #333;
+    font-size: 15px;
+}
+
+.post-time {
+    color: #999;
+    font-size: 13px;
+}
+
+.post-badges {
+    display: flex;
+    gap: 5px;
+}
+
+.badge {
+    padding: 1px 6px;
+    border-radius: 2px;
+    font-size: 12px;
+    color: #fff;
+    font-weight: 500;
+}
+
+.badge-new {
+    background-color: #f56c6c;
+}
+
+.badge-essence {
+    background-color: #409eff;
+}
+
+.post-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+    display: block;
+    line-height: 1.5;
+}
+
+.post-title:hover {
+    color: #0084ff;
+}
+
+.post-footer {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+.post-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-reply,
+.btn-detail {
+    padding: 5px 15px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 13px;
+    color: #666;
+    background-color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-reply:hover {
+    border-color: #0084ff;
+    color: #0084ff;
+}
+
+.btn-detail:hover {
+    border-color: #0084ff;
+    color: #0084ff;
+    background-color: #f0f8ff;
+}
+
+/* 响应式设计 */
+@media (max-width: 992px) {
+    .navbar-search {
+        display: none;
+    }
+    
+    .navbar-menu {
+        gap: 15px;
+    }
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 0 10px;
+    }
+    
+    .navbar-menu {
+        display: none;
+    }
+    
+    .post-item {
+        flex-direction: column;
+    }
+    
+    .post-avatar-wrapper {
+        align-self: flex-start;
+    }
+}
+
