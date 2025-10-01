@@ -43,6 +43,14 @@ export const getUserProfile = (userId) => {
   })
 }
 
+// 获取验证码(base64)
+export const getCaptchaBase64 = () => {
+  return request({
+    url: '/captcha/base64',
+    method: 'get'
+  })
+}
+
 /**
  * 修改密码
  */

@@ -52,7 +52,12 @@
                 alt="验证码" 
                 class="captcha-img"
                 @click="refreshCaptcha"
+                @load="handleCaptchaLoad"
+                @error="handleCaptchaError"
               />
+              <div v-else class="captcha-loading" @click="refreshCaptcha">
+                加载中...
+              </div>
               <span class="refresh-text" @click="refreshCaptcha">刷新验证码</span>
             </div>
             <span v-if="errors.captcha" class="error-text">{{ errors.captcha }}</span>
@@ -81,7 +86,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { login } from '@/api/user'
+import { login, getCaptchaBase64 } from '@/api/user'
 
 const router = useRouter()
 const loading = ref(false)
@@ -101,9 +106,29 @@ const errors = reactive({
 })
 
 // 刷新验证码
-const refreshCaptcha = () => {
-  const timestamp = new Date().getTime()
-  captchaUrl.value = `/api/captcha?t=${timestamp}`
+const refreshCaptcha = async () => {
+  try {
+    const res = await getCaptchaBase64()
+    if (res && res.data && res.data.image) {
+      captchaUrl.value = `data:image/png;base64,${res.data.image}`
+    } else if (res && res.code === 1 && res.data && res.data.image) {
+      // 兼容后端Result包装
+      captchaUrl.value = `data:image/png;base64,${res.data.image}`
+    }
+  } catch (e) {
+    console.error('验证码加载失败:', e)
+    ElMessage.error('验证码加载失败，请点击刷新')
+  }
+}
+
+// 验证码加载成功
+const handleCaptchaLoad = () => {
+  console.log('验证码加载成功')
+}
+
+// 验证码加载失败
+const handleCaptchaError = (e) => {
+  console.error('验证码渲染失败:', e)
 }
 
 const handleLogin = async () => {
@@ -267,9 +292,28 @@ onMounted(() => {
   border-radius: 4px;
   cursor: pointer;
   object-fit: cover;
+  display: block;
 }
 
 .captcha-img:hover {
+  border-color: #17a2b8;
+}
+
+.captcha-loading {
+  width: 100px;
+  height: 40px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+  font-size: 12px;
+  color: #999;
+}
+
+.captcha-loading:hover {
   border-color: #17a2b8;
 }
 
