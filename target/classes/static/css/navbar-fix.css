@@ -1,0 +1,15 @@
+/* 导航栏细节修复 */
+.navbar-nav > li {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-nav .btn {
+    margin: 0 5px;
+}
+
+/* 消息数字徽章 */
+.navbar-nav > li > a {
+    position: relative;
+}
+

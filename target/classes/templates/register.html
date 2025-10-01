@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户注册 - 牛客论坛</title>
+    <link rel="stylesheet" th:href="@{/css/common.css}">
+    <link rel="stylesheet" th:href="@{/css/auth.css}">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img th:src="@{/img/首页底部的分页导航栏.jpg}" alt="Logo" style="height: 60px;">
+                </div>
+                <h1 class="auth-title">加入我们</h1>
+                <p class="auth-subtitle">创建牛客论坛账号</p>
+            </div>
+
+            <form class="auth-form" id="registerForm">
+                <div class="form-group">
+                    <label class="form-label">用户名</label>
+                    <input type="text" class="form-control" id="username" name="username" 
+                           placeholder="请输入用户名" required>
+                    <div class="error-msg" id="usernameError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">密码</label>
+                    <input type="password" class="form-control" id="password" name="password" 
+                           placeholder="请输入密码（至少6位）" required>
+                    <div class="error-msg" id="passwordError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">确认密码</label>
+                    <input type="password" class="form-control" id="confirmPwd" name="confirmPwd" 
+                           placeholder="请再次输入密码" required>
+                    <div class="error-msg" id="confirmPwdError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">邮箱</label>
+                    <input type="email" class="form-control" id="email" name="email" 
+                           placeholder="请输入邮箱" required>
+                    <div class="error-msg" id="emailError"></div>
+                </div>
+
+                <button type="submit" class="submit-btn">注册</button>
+            </form>
+
+            <div class="auth-footer">
+                已有账号？<a href="/login">立即登录</a>
+            </div>
+        </div>
+    </div>
+
+    <script th:src="@{/js/common.js}"></script>
+    <script>
+        // 表单提交
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // 清除之前的错误信息
+            document.querySelectorAll('.error-msg').forEach(el => {
+                el.classList.remove('show');
+                el.textContent = '';
+            });
+
+            // 获取表单数据
+            const formData = {
+                username: document.getElementById('username').value.trim(),
+                password: document.getElementById('password').value,
+                confirmPwd: document.getElementById('confirmPwd').value,
+                email: document.getElementById('email').value.trim()
+            };
+
+            // 前端验证
+            if (!formData.username) {
+                showError('usernameError', '用户名不能为空');
+                return;
+            }
+            if (formData.username.length < 3) {
+                showError('usernameError', '用户名至少3个字符');
+                return;
+            }
+            if (!formData.password) {
+                showError('passwordError', '密码不能为空');
+                return;
+            }
+            if (formData.password.length < 6) {
+                showError('passwordError', '密码至少6个字符');
+                return;
+            }
+            if (formData.password !== formData.confirmPwd) {
+                showError('confirmPwdError', '两次输入的密码不一致');
+                return;
+            }
+            if (!formData.email) {
+                showError('emailError', '邮箱不能为空');
+                return;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+                showError('emailError', '邮箱格式不正确');
+                return;
+            }
+
+            // 发送注册请求
+            try {
+                const response = await request('/users/register', 'POST', formData);
+                
+                if (response.code === 1) {
+                    // 注册成功
+                    showMessage('注册成功，即将跳转到登录页...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/login';
+                    }, 1500);
+                } else {
+                    // 注册失败
+                    showMessage(response.msg, 'error');
+                }
+            } catch (error) {
+                showMessage('注册失败，请稍后重试', 'error');
+            }
+        });
+
+        function showError(id, msg) {
+            const errorEl = document.getElementById(id);
+            errorEl.textContent = msg;
+            errorEl.classList.add('show');
+        }
+    </script>
+</body>
+</html>
+
