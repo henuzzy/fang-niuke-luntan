@@ -18,7 +18,7 @@ import java.util.*;
  * 帖子控制器
  */
 @RestController
-@RequestMapping("/posts")
+@RequestMapping("/api/posts")
 public class DiscussPostController {
 
     @Autowired

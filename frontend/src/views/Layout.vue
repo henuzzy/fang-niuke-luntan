@@ -21,9 +21,26 @@
             消息
             <el-badge v-if="unreadCount > 0" :value="unreadCount" class="message-badge" />
           </a>
-          
-          <!-- 注册登录链接（未登录时显示） -->
-          <template v-if="!isLogin">
+
+          <!-- 登录后：在消息右边显示头像 + 下拉三角 -->
+          <template v-if="isLogin">
+            <el-dropdown @command="handleCommand" trigger="click">
+              <div class="user-avatar-wrapper">
+                <el-avatar :size="32" :src="userAvatar" />
+                <span class="caret"></span>
+              </div>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <el-dropdown-item command="profile">个人主页</el-dropdown-item>
+                  <el-dropdown-item command="settings">账号设置</el-dropdown-item>
+                  <el-dropdown-item divided command="logout">退出登录</el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
+          </template>
+
+          <!-- 未登录：显示注册/登录（仍在消息右边） -->
+          <template v-else>
             <a href="/register" :class="{ active: $route.path === '/register' }">注册</a>
             <a href="/login" :class="{ active: $route.path === '/login' }">登录</a>
           </template>
@@ -41,22 +58,7 @@
               <el-icon><Search /></el-icon>
             </template>
           </el-input>
-
-          <!-- 用户头像（登录后显示） -->
-          <template v-if="isLogin">
-            <el-dropdown @command="handleCommand" trigger="click">
-              <div class="user-avatar-wrapper">
-                <el-avatar :size="36" :src="userAvatar" />
-              </div>
-              <template #dropdown>
-                <el-dropdown-menu>
-                  <el-dropdown-item command="profile">个人主页</el-dropdown-item>
-                  <el-dropdown-item command="settings">账号设置</el-dropdown-item>
-                  <el-dropdown-item divided command="logout">退出登录</el-dropdown-item>
-                </el-dropdown-menu>
-              </template>
-            </el-dropdown>
-          </template>
+          <el-button class="search-btn" @click="handleSearch">搜索</el-button>
         </div>
       </div>
     </el-header>
@@ -131,6 +133,15 @@ const handleCommand = async (command) => {
   } else if (command === 'settings') {
     router.push('/settings')
   }
+}
+
+const handleSearch = () => {
+  if (!searchText.value || !searchText.value.trim()) {
+    ElMessage.warning('请输入搜索内容')
+    return
+  }
+  // TODO: 跳转到搜索结果页
+  ElMessage.info(`搜索：${searchText.value.trim()}`)
 }
 
 // Logo已改为SVG，无需错误处理
@@ -245,6 +256,20 @@ const handleCommand = async (command) => {
   width: 200px;
 }
 
+.search-btn {
+  height: 32px;
+  line-height: 32px;
+  padding: 0 16px;
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  color: #fff;
+}
+
+.search-btn:hover {
+  background-color: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.85);
+}
+
 .navbar-search :deep(.el-input__wrapper) {
   background-color: rgba(255, 255, 255, 0.15);
   border-radius: 4px;
@@ -283,6 +308,15 @@ const handleCommand = async (command) => {
 
 .user-avatar-wrapper:hover {
   opacity: 0.8;
+}
+
+.caret {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 6px solid rgba(255, 255, 255, 0.8);
+  margin-left: 6px;
 }
 
 .main-content {
