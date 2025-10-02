@@ -11,7 +11,7 @@
               <text x="50%" y="50%" font-size="18" fill="#333" text-anchor="middle" dy=".35em" font-weight="bold">牛</text>
             </svg>
           </div>
-          <span class="navbar-brand" @click="$router.push('/')">牛客</span>
+          <span class="navbar-brand">牛客</span>
         </div>
 
         <!-- 中间菜单 -->

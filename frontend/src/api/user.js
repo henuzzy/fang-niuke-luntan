@@ -63,6 +63,17 @@ export const updatePassword = (userId, data) => {
 }
 
 /**
+ * 上传头像（传 headerUrl 字符串，可为文件上传后的URL或Base64）
+ */
+export const uploadAvatar = (userId, headerUrl) => {
+  return request({
+    url: `/users/avatar/${userId}`,
+    method: 'post',
+    params: { headerUrl }
+  })
+}
+
+/**
  * 关注用户
  */
 export const followUser = (userId) => {

@@ -1,72 +1,59 @@
 <template>
   <div class="settings-page">
-    <el-card class="settings-card">
-      <!-- 标签页 -->
-      <el-tabs v-model="activeTab" class="settings-tabs">
-        <el-tab-pane label="个人资料" name="profile">
-          <el-form :model="profileForm" label-width="100px" class="settings-form">
-            <el-form-item label="用户名">
-              <el-input v-model="profileForm.username" disabled />
-            </el-form-item>
-            <el-form-item label="邮箱">
-              <el-input v-model="profileForm.email" />
-            </el-form-item>
-            <el-form-item label="头像">
-              <el-upload
-                class="avatar-uploader"
-                action="#"
-                :show-file-list="false"
-                :auto-upload="false"
-              >
-                <el-avatar :size="100" :src="profileForm.headerUrl || getDefaultAvatar()" />
-              </el-upload>
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="handleUpdateProfile">保存修改</el-button>
-            </el-form-item>
-          </el-form>
-        </el-tab-pane>
+    <el-card class="block-card">
+      <!-- 上传头像 -->
+      <h3 class="block-title">上传头像</h3>
+      <div class="upload-row">
+        <span class="upload-label">选择头像：</span>
+        <el-input v-model="uploadFileName" placeholder="选择一张图片" class="upload-input" disabled />
+        <input type="file" accept="image/*" @change="onFileChange" class="hidden-file-input" ref="fileInputRef" />
+        <el-button @click="triggerChooseFile">文件</el-button>
+      </div>
+      <div class="upload-action">
+        <el-button type="primary" @click="handleUploadAvatar" :loading="uploading">立即上传</el-button>
+      </div>
 
-        <el-tab-pane label="修改密码" name="password">
-          <el-form 
-            ref="passwordFormRef"
-            :model="passwordForm" 
-            :rules="passwordRules"
-            label-width="100px" 
-            class="settings-form"
-          >
-            <el-form-item label="原密码" prop="oldPassword">
-              <el-input 
-                v-model="passwordForm.oldPassword" 
-                type="password" 
-                placeholder="请输入原密码"
-                show-password
-              />
-            </el-form-item>
-            <el-form-item label="新密码" prop="newPassword">
-              <el-input 
-                v-model="passwordForm.newPassword" 
-                type="password" 
-                placeholder="请输入新密码"
-                show-password
-              />
-            </el-form-item>
-            <el-form-item label="确认密码" prop="confirmPassword">
-              <el-input 
-                v-model="passwordForm.confirmPassword" 
-                type="password" 
-                placeholder="请再次输入新密码"
-                show-password
-              />
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="handleUpdatePassword" :loading="loading">
-                修改密码
-              </el-button>
-            </el-form-item>
-          </el-form>
-        </el-tab-pane>
-      </el-tabs>
+      <el-divider />
+
+      <!-- 修改密码 -->
+      <h3 class="block-title">修改密码</h3>
+      <el-form 
+        ref="passwordFormRef"
+        :model="passwordForm" 
+        :rules="passwordRules"
+        label-width="70px" 
+        class="settings-form"
+      >
+        <el-form-item label="原密码" prop="oldPassword">
+          <el-input 
+            v-model="passwordForm.oldPassword" 
+            type="password" 
+            placeholder="请输入原密码"
+            show-password
+          />
+        </el-form-item>
+        <el-form-item label="新密码" prop="newPassword">
+          <el-input 
+            v-model="passwordForm.newPassword" 
+            type="password" 
+            placeholder="请输入新密码"
+            show-password
+          />
+        </el-form-item>
+        <el-form-item label="确认密码" prop="confirmPassword">
+          <el-input 
+            v-model="passwordForm.confirmPassword" 
+            type="password" 
+            placeholder="请再次输入新密码"
+            show-password
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" @click="handleUpdatePassword" :loading="loading">
+            立即保存
+          </el-button>
+        </el-form-item>
+      </el-form>
     </el-card>
   </div>
 </template>
@@ -75,12 +62,14 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { updatePassword } from '@/api/user'
+import { updatePassword, uploadAvatar } from '@/api/user'
 
 const router = useRouter()
-const activeTab = ref('profile')
 const loading = ref(false)
 const passwordFormRef = ref()
+const fileInputRef = ref()
+const uploadFileName = ref('')
+const uploading = ref(false)
 
 const profileForm = reactive({
   username: '',
@@ -123,6 +112,39 @@ const getDefaultAvatar = () => {
 
 const handleUpdateProfile = () => {
   ElMessage.info('个人资料修改功能开发中...')
+}
+
+const triggerChooseFile = () => {
+  fileInputRef.value && fileInputRef.value.click()
+}
+
+const onFileChange = (e) => {
+  const file = e.target.files && e.target.files[0]
+  if (!file) return
+  uploadFileName.value = file.name
+  const reader = new FileReader()
+  reader.onload = () => {
+    profileForm.headerUrl = reader.result
+  }
+  reader.readAsDataURL(file)
+}
+
+const handleUploadAvatar = async () => {
+  if (!profileForm.headerUrl) {
+    ElMessage.warning('请先选择图片')
+    return
+  }
+  try {
+    uploading.value = true
+    const userId = localStorage.getItem('userId')
+    const res = await uploadAvatar(userId, profileForm.headerUrl)
+    if (res && res.data && res.data.headerUrl) {
+      localStorage.setItem('userAvatar', res.data.headerUrl)
+      ElMessage.success('头像上传成功')
+    }
+  } finally {
+    uploading.value = false
+  }
 }
 
 const handleUpdatePassword = async () => {
@@ -170,9 +192,13 @@ onMounted(() => {
   padding: 20px;
 }
 
-.settings-card {
-  border-radius: 4px;
-}
+.block-card { margin: 0; }
+.block-title { font-size: 18px; margin-bottom: 16px; }
+.upload-row { display: flex; align-items: center; gap: 10px; }
+.upload-label { width: 70px; color: #666; text-align: right; }
+.upload-input { flex: 1; }
+.hidden-file-input { display: none; }
+.upload-action { margin-top: 14px; }
 
 .settings-tabs :deep(.el-tabs__header) {
   margin-bottom: 20px;
@@ -200,10 +226,7 @@ onMounted(() => {
   background-color: #409eff;
 }
 
-.settings-form {
-  max-width: 500px;
-  margin-top: 30px;
-}
+.settings-form { max-width: 500px; margin-top: 10px; }
 
 .avatar-uploader {
   cursor: pointer;
