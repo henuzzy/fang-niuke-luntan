@@ -14,10 +14,11 @@ export const getPostList = (params) => {
 /**
  * 获取帖子详情
  */
-export const getPostDetail = (id) => {
+export const getPostDetail = (id, params) => {
   return request({
     url: `/posts/${id}`,
-    method: 'get'
+    method: 'get',
+    params
   })
 }
 
@@ -50,6 +51,27 @@ export const likePost = (postId) => {
   return request({
     url: `/posts/${postId}/like`,
     method: 'post'
+  })
+}
+
+/**
+ * 点赞评论/回复
+ */
+export const likeComment = (commentId) => {
+  return request({
+    url: `/posts/comments/${commentId}/like`,
+    method: 'post'
+  })
+}
+
+/**
+ * 回复评论
+ */
+export const replyComment = (postId, commentId, data) => {
+  return request({
+    url: `/posts/${postId}/comments/${commentId}/replies`,
+    method: 'post',
+    data
   })
 }
 

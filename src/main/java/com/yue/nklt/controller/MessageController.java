@@ -3,6 +3,8 @@ package com.yue.nklt.controller;
 import com.yue.nklt.dto.Result;
 import com.yue.nklt.entity.Message;
 import com.yue.nklt.service.MessageService;
+import com.yue.nklt.service.UserService;
+import com.yue.nklt.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,6 +19,9 @@ public class MessageController {
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private UserService userService;
 
     /**
      * 查询私信会话列表
@@ -49,6 +54,16 @@ public class MessageController {
     public Result sendMessage(@RequestParam Integer fromId,
                               @RequestParam Integer toId,
                               @RequestParam String content) {
+        // 校验用户是否存在
+        if (toId == null || userService.findUserById(toId) == null) {
+            return Result.fail("用户不存在");
+        }
+        if (fromId == null || userService.findUserById(fromId) == null) {
+            return Result.fail("请先登录");
+        }
+        if (content == null || content.trim().isEmpty()) {
+            return Result.fail("内容不能为空");
+        }
         Message m = new Message();
         m.setFromId(fromId);
         m.setToId(toId);

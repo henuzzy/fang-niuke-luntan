@@ -3,6 +3,10 @@ package com.yue.nklt.controller;
 import com.yue.nklt.dto.*;
 import com.yue.nklt.entity.User;
 import com.yue.nklt.service.UserService;
+import com.yue.nklt.service.FollowService;
+import com.yue.nklt.service.LikeService;
+import com.yue.nklt.service.EventProducer;
+import com.yue.nklt.entity.Event;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +25,15 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private FollowService followService;
+
+    @Autowired
+    private LikeService likeService;
+
+    @Autowired
+    private EventProducer eventProducer;
 
     /**
      * 用户注册
@@ -98,7 +111,8 @@ public class UserController {
      * 查看个人主页
      */
     @GetMapping("/{userId}/profile")
-    public Result getProfile(@PathVariable Integer userId) {
+    public Result getProfile(@PathVariable Integer userId,
+                             @RequestAttribute(value = "userId", required = false) Integer currentUserId) {
         User user = userService.findUserById(userId);
         if (user == null) {
             return Result.fail("用户不存在");
@@ -110,11 +124,14 @@ public class UserController {
         data.put("email", user.getEmail());
         data.put("headerUrl", user.getHeaderUrl());
         data.put("createTime", user.getCreateTime());
-        // TODO: 统计帖子数、评论数、点赞数、关注数、粉丝数
-        data.put("followeeCount", 5);  // 关注的人数
-        data.put("followerCount", 123); // 粉丝数
-        data.put("likeCount", 87);      // 获得的赞数
-        data.put("hasFollowed", false); // 当前用户是否已关注
+        // 关注计数
+        data.put("followeeCount", followService.findFolloweeCount(user.getId(), 3));
+        data.put("followerCount", followService.findFollowerCount(3, user.getId()));
+        // 获赞数
+        data.put("likeCount", likeService.findUserLikeCount(user.getId()));
+        // 是否已关注
+        boolean followed = currentUserId != null && followService.hasFollowed(currentUserId, 3, user.getId());
+        data.put("hasFollowed", followed);
 
         return Result.ok(data);
     }
@@ -123,10 +140,18 @@ public class UserController {
      * 关注用户
      */
     @PostMapping("/follow/{userId}")
-    public Result follow(@PathVariable Integer userId, HttpSession session) {
-        // TODO: 从session或token中获取当前登录用户ID
-        // Integer currentUserId = ...
-        // userService.follow(currentUserId, userId);
+    public Result follow(@PathVariable Integer userId,
+                         @RequestAttribute("userId") Integer currentUserId) {
+        followService.follow(currentUserId, 3, userId);
+        if (!userId.equals(currentUserId)) {
+            Event ev = new Event();
+            ev.setTopic("follow");
+            ev.setUserId(currentUserId);
+            ev.setEntityType(3);
+            ev.setEntityId(userId);
+            ev.setEntityOwnerId(userId);
+            eventProducer.fireEvent(ev);
+        }
         return Result.ok("关注成功", null);
     }
 
@@ -134,10 +159,9 @@ public class UserController {
      * 取消关注用户
      */
     @PostMapping("/unfollow/{userId}")
-    public Result unfollow(@PathVariable Integer userId, HttpSession session) {
-        // TODO: 从session或token中获取当前登录用户ID
-        // Integer currentUserId = ...
-        // userService.unfollow(currentUserId, userId);
+    public Result unfollow(@PathVariable Integer userId,
+                           @RequestAttribute("userId") Integer currentUserId) {
+        followService.unfollow(currentUserId, 3, userId);
         return Result.ok("取消关注成功", null);
     }
 

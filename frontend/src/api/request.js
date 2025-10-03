@@ -10,10 +10,10 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(
   config => {
-    // 从localStorage获取token
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`
+    // 使用后端登录返回的 ticket 作为认证凭证
+    const ticket = localStorage.getItem('ticket')
+    if (ticket) {
+      config.headers['Authorization'] = `Bearer ${ticket}`
     }
     return config
   },

@@ -44,11 +44,6 @@ services:
       - zookeeper
     restart: always
 
-#  wkhtmltopdf:
-#    image: ghcr.io/puppeteer/wkhtmltopdf:latest
-#    ports:
-#      - "8080:8080"
-#    restart: always
 
   wkhtmltopdf:
     image: interns/wkhtmltopdf:latest
