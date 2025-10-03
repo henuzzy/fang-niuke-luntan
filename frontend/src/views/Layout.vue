@@ -17,7 +17,7 @@
         <!-- 中间菜单 -->
         <div class="navbar-menu">
           <a href="/" :class="{ active: $route.path === '/' }">首页</a>
-          <a href="#" class="message-link" :class="{ active: $route.path === '/messages' }">
+          <a href="/messages" class="message-link" :class="{ active: $route.path === '/messages' }">
             消息
             <el-badge v-if="unreadCount > 0" :value="unreadCount" class="message-badge" />
           </a>

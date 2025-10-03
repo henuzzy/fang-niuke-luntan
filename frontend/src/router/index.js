@@ -12,6 +12,16 @@ const routes = [
         component: () => import('@/views/Home.vue')
       },
       {
+        path: '/messages',
+        name: 'Messages',
+        component: () => import('@/views/Messages.vue')
+      },
+      {
+        path: '/messages/:conversationId',
+        name: 'MessageDetail',
+        component: () => import('@/views/MessageDetail.vue')
+      },
+      {
         path: '/discover',
         name: 'Discover',
         component: () => import('@/views/Discover.vue')
